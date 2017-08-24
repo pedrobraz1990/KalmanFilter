@@ -4,18 +4,7 @@ import pandas as pd
 ##### KF1
 # Matrix version of durbin and koopman
 
-#TODO If all you want is the likelihood there should be a simplified version of the KF
-# With an overhead function and a parameter returnLikelihood = True
 
-# TODO Steps:
-# Create a KF that works - Check KF1
-# Create a KF for nulls - Check Kf1
-# Create a univariate KF that works
-# Create a univariate KF that works for nulls
-
-# Separate the KF for likelihood and for getting the states (or not ?)
-
-# Cythonize
 
 
 def KalmanFilter(y, Z, H, T, Q, a1, P1, R):
@@ -45,20 +34,23 @@ def KalmanFilter(y, Z, H, T, Q, a1, P1, R):
 
         if ind != 1:
             # Eq #1 vt = yt - Zt at
-            vt = y[t, :] - np.dot(Z, at) #TODO check if doing it in two steps is faster
+            vt = y[t, :] - Z.dot(at) #TODO check if doing it in two steps is faster
 
             # Eq #2 Ft = Zt Pt Z't + Ht
 
-            Ft = np.linalg.multi_dot([Z, Pt, ZT]) + H #TODO Check function to do several multiplications in a row
+            # Ft = np.linalg.multi_dot([Z, Pt, ZT]) + H #TODO check if doing it in two steps is faster
+            Ft = Z.dot(Pt).dot(ZT) + H
 
             Ft_inv = np.linalg.inv(Ft) #avoid transposing it several times
 
             if ind == 0:
                 # Eq #3 att = at + Pt Z't F-1t vt
-                att = at + np.linalg.multi_dot([Pt, ZT, Ft_inv, vt])
+                # att = at + np.linalg.multi_dot([Pt, ZT, Ft_inv, vt])
+                att = at + Pt.dot(ZT).dot(Ft_inv).dot(vt)
 
                 # Eq #4 Ptt = Pt - Pt Z't F-1t Zt Pt
-                Ptt = Pt - np.linalg.multi_dot([Pt, ZT, Ft_inv, Z, Pt]) #TODO Maybe store Z't F-1t
+                # Ptt = Pt - np.linalg.multi_dot([Pt, ZT, Ft_inv, Z, Pt]) #TODO Maybe store Z't F-1t
+                Ptt = Pt - Pt.dot(ZT).dot(Ft_inv).dot(Z).dot(Pt)
 
             else:
                 att = at
@@ -66,13 +58,12 @@ def KalmanFilter(y, Z, H, T, Q, a1, P1, R):
 
 
             # Eq #5 at+1 = T att
-
-            at = np.dot(T, att) # Actually at+1
+            at = T.dot(att) # Actually at+1
             a[:, t + 1] = at
 
             # Eq #6 Pt = Tt Ptt T' + R Q R
-
-            Pt = np.linalg.multi_dot([T, Ptt, TT]) + RQR # Actually Pt+1
+            # Pt = np.linalg.multi_dot([T, Ptt, TT]) + RQR # Actually Pt+1
+            Pt = T.dot(Ptt).dot(TT) + RQR
 
         else:
             nanIndex = np.isnan(y[t, :])
@@ -82,33 +73,40 @@ def KalmanFilter(y, Z, H, T, Q, a1, P1, R):
             Yst = y[t, :][~nanIndex]
 
 
-            Zst = np.dot(Wt, Z)
-            Hst = np.linalg.multi_dot([Wt,H,Wt.T])
+            Zst = Wt.dot(Z)
+            # Hst = np.linalg.multi_dot([Wt,H,Wt.T])
+            Hst = Wt.dot(H).dot(Wt.T)
             ZTst = Zst.T
 
             # Eq #1 vt = yt - Zt at
-            vt = Yst - np.dot(Zst, at)  # TODO check if doing it in two steps is faster
+            vt = Yst - Zst.dot(at)  # TODO check if doing it in two steps is faster
+
 
             # Eq #2 Ft = Zt Pt Z't + Ht
-
-            Ft = np.linalg.multi_dot([Zst, Pt, ZTst]) + Hst  # TODO Check function to do several multiplications in a row
+            # Ft = np.linalg.multi_dot([Zst, Pt, ZTst]) + Hst  # TODO Check function to do several multiplications in a row
+            Ft = Zst.dot(Pt).dot(ZTst) + Hst
 
             Ft_inv = np.linalg.inv(Ft)  # avoid transposing it several times
 
+
             # Eq #3 att = at + Pt Z't F-1t vt
-            att = at + np.linalg.multi_dot([Pt, ZTst, Ft_inv, vt])
+            # att = at + np.linalg.multi_dot([Pt, ZTst, Ft_inv, vt])
+            att = at + Pt.dot(ZTst).dot(Ft_inv).dot(vt)
+
 
             # Eq #4 Ptt = Pt - Pt Z't F-1t Zt Pt
-            Ptt = Pt - np.linalg.multi_dot([Pt, ZTst, Ft_inv, Zst, Pt])  # TODO Maybe store Z't F-1t
+            # Ptt = Pt - np.linalg.multi_dot([Pt, ZTst, Ft_inv, Zst, Pt])  # TODO Maybe store Z't F-1t
+            Ptt = Pt - Pt.dot(ZTst).dot(Ft_inv).dot(Zst).dot(Pt)
+
 
             # Eq #5 at+1 = T att
-
-            at = np.dot(T, att)  # Actually at+1
+            at = T.dot(att)  # Actually at+1
             a[:, t + 1] = at
 
-            # Eq #6 Pt = Tt Ptt T' + R Q R
 
-            Pt = np.linalg.multi_dot([T, Ptt, TT]) + RQR  # Actually Pt+1
+            # Eq #6 Pt = Tt Ptt T' + R Q R
+            # Pt = np.linalg.multi_dot([T, Ptt, TT]) + RQR  # Actually Pt+1
+            Pt = T.dot(Ptt).dot(TT) + RQR  # Actually Pt+1
 
 
 

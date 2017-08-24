@@ -75,22 +75,9 @@ P1 = np.diag(np.ones(m) * 1.0)
 # )
 
 
-# ret = KF2.KalmanFilter(
-#     y = y,
-#     Z = Z,
-#     H = H,
-#     T = T,
-#     R = R,
-#     Q = Q,
-#     a1 = a1,
-#     P1 = P1,
-# )
-
-
-ret = KF_PaperUni.KalmanFilter(
-    y = y,
-#     y = wny,
-#     y = nny,
+ret = KF2.KalmanFilter(
+    # y = y,
+    y = nny,
     Z = Z,
     H = H,
     T = T,
@@ -98,8 +85,22 @@ ret = KF_PaperUni.KalmanFilter(
     Q = Q,
     a1 = a1,
     P1 = P1,
-    nStates = a1.shape[0],
-    export=True
 )
+
+
+# ret = KF_PaperUni.KalmanFilter(
+#     y = y,
+# #     y = wny,
+# #     y = nny,
+#     Z = Z,
+#     H = H,
+#     T = T,
+#     R = R,
+#     Q = Q,
+#     a1 = a1,
+#     P1 = P1,
+#     nStates = a1.shape[0],
+#     export=True
+# )
 
 # print(ret)
