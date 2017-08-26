@@ -38,6 +38,9 @@ def KalmanFilter(y, nStates, Z, H, T, Q, a1, P1, R, export=False):
         ind = ~np.isnan(y[t, :])
         templl = 0
         pst = 0
+
+
+
         for i in range(0, p):  # later on change to Pt
             if ind[i]:
                 v[t, i] = y[t, i] - Z[i, :].reshape((1, m)).dot(a[t, i, :].T)  # a should be mx1

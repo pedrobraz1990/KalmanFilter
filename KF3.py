@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 import time
 
-##### KF2
+##### KF3
 # Univariate version of durbin and koopman
-
+# Should be the same as KF2 but without storing useless data
 
 # @profile
 def KalmanFilter(y, Z, H, T, Q, a1, P1, R):
@@ -35,6 +35,9 @@ def KalmanFilter(y, Z, H, T, Q, a1, P1, R):
     yhat = np.empty((n,p)) #Later I should use it to export in numpy not pandas
 
     yind = np.empty(p)
+    yt = np.empty(p)
+    Zt = np.empty((p, m))
+    Ht = np.empty(p)
 
 
     # times = []
@@ -43,10 +46,10 @@ def KalmanFilter(y, Z, H, T, Q, a1, P1, R):
     for t in range(0, n):
         # decide pt and yt
         yind = ~np.isnan(y[t,:])
-        yt = y[t,yind]
         pt = yind.sum()
-        Zt = Z[yind,:]
-        Ht = H[yind] #ONLY WORKS FOR DIAGONAL H
+        yt[:pt] = y[t,yind]
+        Zt[:pt,:] = Z[yind,:]
+        Ht[:pt] = H[yind] #ONLY WORKS FOR DIAGONAL H
 
         for i in range(0, pt):
 

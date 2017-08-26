@@ -4,6 +4,8 @@ import pandas as pd
 import KF1
 import KF2
 import KF_PaperUni
+import KF3
+import CKF3
 
 # PARAMETERS
 m = 2
@@ -63,8 +65,14 @@ a1 = np.zeros(m)
 #P1 = (m x m)
 P1 = np.diag(np.ones(m) * 1.0)
 
-# ret = KF1.KalmanFilter(
-#     y = nny,
+
+
+# ret = CKF3.KalmanFilter(y = y, Z = Z,H = H,T = T,R = R,Q = Q,a1 = a1,P1 = P1)
+ret = CKF3.KalmanFilter(y,Z,H,T,Q,a1,P1, R)
+
+# ret = CKF3.KalmanFilter(
+#     y = y,
+#     # y = nny,
 #     Z = Z,
 #     H = H,
 #     T = T,
@@ -73,19 +81,6 @@ P1 = np.diag(np.ones(m) * 1.0)
 #     a1 = a1,
 #     P1 = P1,
 # )
-
-
-ret = KF2.KalmanFilter(
-    # y = y,
-    y = nny,
-    Z = Z,
-    H = H,
-    T = T,
-    R = R,
-    Q = Q,
-    a1 = a1,
-    P1 = P1,
-)
 
 
 # ret = KF_PaperUni.KalmanFilter(
@@ -104,3 +99,6 @@ ret = KF2.KalmanFilter(
 # )
 
 # print(ret)
+
+
+# kernprof -l -v DummyData.py

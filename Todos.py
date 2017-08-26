@@ -7,8 +7,8 @@
 # TODO Steps:
 # Create a KF that works - Check KF1
 # Create a KF for nulls - Check Kf1
-# Create a univariate KF that works
-# Create a univariate KF that works for nulls
+# Create a univariate KF that works - Check KF2
+# Create a univariate KF that works for nulls - Check KF2
 
 # Separate the KF for likelihood and for getting the states (or not ?)
 
