@@ -6,6 +6,11 @@ import KF2
 import KF_PaperUni
 import KF3
 import CKF3
+import CKF4
+import CKF5
+import CKF7
+import CKF8
+import CKF10
 
 # PARAMETERS
 m = 2
@@ -68,11 +73,12 @@ P1 = np.diag(np.ones(m) * 1.0)
 
 
 # ret = CKF3.KalmanFilter(y = y, Z = Z,H = H,T = T,R = R,Q = Q,a1 = a1,P1 = P1)
-ret = CKF3.KalmanFilter(y,Z,H,T,Q,a1,P1, R)
+# ret = CKF3.KalmanFilter(y,Z,H,T,Q,a1,P1, R)
+ret = CKF10.KalmanFilter(nny,Z,H,T,Q,a1,P1, R)
 
-# ret = CKF3.KalmanFilter(
-#     y = y,
-#     # y = nny,
+# ret = KF3.KalmanFilter(
+#     # y = y,
+#     y = nny,
 #     Z = Z,
 #     H = H,
 #     T = T,
@@ -102,3 +108,4 @@ ret = CKF3.KalmanFilter(y,Z,H,T,Q,a1,P1, R)
 
 
 # kernprof -l -v DummyData.py
+# python -m line_profiler DummyData.py.lprof

@@ -3,15 +3,37 @@ cimport numpy as np
 import pandas as pd
 import time
 from cpython cimport bool
+import line_profiler
+cimport cython
+
+from libc.math cimport isnan
 
 ctypedef np.double_t DTYPE_t
 
 ##### KF3
 # Univariate version of durbin and koopman
-# Should be the same as KF2 but without storing useless data
+# Should be the same as CFK8 checking whether it is best to use a memory view for yt.sum()
 
-# @profile
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef int getSum(int[:] arr, int arrLen) nogil:
+
+    cdef int i
+    cdef int s = 0
+
+    for i in range(0,arrLen):
+        s += arr[i]
+    return s
+
 #def KalmanFilter(y, Z, Hsq, T, Q, a1, P1, R):
+@cython.boundscheck(False)
+@cython.wraparound(False)
+#@cython.initializedcheck(False)
+#@cython.cdivision(True)
+#@cython.nonecheck(False)
+#@profile
 def KalmanFilter(
         np.ndarray[DTYPE_t, ndim=2] y,
         np.ndarray[DTYPE_t, ndim=2] Z,
@@ -21,7 +43,7 @@ def KalmanFilter(
         np.ndarray[DTYPE_t, ndim=1] a1,
         np.ndarray[DTYPE_t, ndim=2] P1,
         np.ndarray[DTYPE_t, ndim=2] R
-   ):
+   ) :
 
     # p = number of variables in Yt
     # y should be (n x p)
@@ -36,12 +58,13 @@ def KalmanFilter(
     cdef np.ndarray[DTYPE_t,ndim=3] a = np.empty((n+1,p+1,m))
     a[0,0,:] = a1
 
-    cdef np.ndarray[DTYPE_t,ndim=4] P = np.empty((n+1, p+1, m, m))
-    P[0, 0,:,:] = P1
+    cdef np.ndarray[DTYPE_t,ndim=2] P = np.empty((m, m))
+    P[:,:] = P1
 
-    cdef np.ndarray[DTYPE_t,ndim=3] K = np.empty((n, p, m))
-    cdef np.ndarray[DTYPE_t,ndim=2] v = np.empty((n, p))
-    cdef np.ndarray[DTYPE_t,ndim=2] F = np.empty((n, p))
+    cdef np.ndarray[DTYPE_t,ndim=1] K = np.empty((m))
+
+    cdef double v,F
+
 
     # RQR = np.linalg.multi_dot([R, Q, R.T])
     cdef np.ndarray[DTYPE_t,ndim=2] RQR = R.dot(Q).dot(R.T)
@@ -57,36 +80,46 @@ def KalmanFilter(
     cdef np.ndarray[DTYPE_t,ndim=2] Zt = np.empty((p, m))
     cdef np.ndarray[DTYPE_t,ndim=1] Ht = np.empty(p)
 
+#    cdef double[:,:] v_mv = v
+#    cdef double[:,:] F_mv = F
+#    cdef double[:,:,:] K_mv = K
+#    cdef double[:,:,:] a_mv = a
+#    cdef double[:,:,:,:] P_mv = P
 
     # times = []
     cdef np.ndarray[DTYPE_t,ndim=1] H = np.diag(Hsq) #ONLY WORKS FOR DIAGONAL H
 
+    cdef int[:] yind_mv
+
     for t in range(0, n):
         # decide pt and yt
         yind = ~np.isnan(y[t,:])
-        pt = yind.sum()
+#        pt = yind.sum()
+        yind_mv = yind.astype(int)
+        pt = getSum(yind_mv, p)
         yt[:pt] = y[t,yind]
         Zt[:pt,:] = Z[yind,:]
         Ht[:pt] = H[yind] #ONLY WORKS FOR DIAGONAL H
 
         for i in range(0, pt):
 
-            v[t,i] = yt[i] - np.inner(Zt[i], a[t,i,:])
+            v = yt[i] - np.dot(Zt[i], a[t,i,:])
 
             # F[t,i] = np.linalg.multi_dot([Z[i], P[t, i,:,:], Z[i]]) + H[i, i]
-            F[t, i] = Zt[i].dot(P[t,i,:,:]).dot(Zt[i]) + Ht[i]
+            F = Zt[i].dot(P[:,:]).dot(Zt[i]) + Ht[i]
 
-            K[t,i,:] = P[t,i,:,:].dot(Zt[i]) * (F[t, i]**(-1))
+            K[:] = P[:,:].dot(Zt[i]) * (F**(-1))
 
-            a[t,i+1,:] = a[t,i,:] + K[t,i,:] * v[t,i]
+            a[t,i+1,:] = a[t,i,:] + K[:] * v
 
-            P[t, i+1,:,:] = P[t, i,:,:] - np.outer(K[t,i,:] * F[t,i], K[t,i,:])
+#            P[:,:] += - np.outer(K * F, K)
+            P[:,:] += - np.dot(K[:,None] * F, K[None,:])
 
 
         a[t+1,0,:] =  T.dot(a[t, pt, :])
 
         # P[t+1, 0,:,:] = np.linalg.multi_dot([T, P[t, i + 1,:,:], TT]) + RQR
-        P[t + 1, 0, :, :] = T.dot(P[t,pt,:,:]).dot(TT) + RQR
+        P[:, :] = T.dot(P[:,:]).dot(TT) + RQR
 
 
         # times.append(temp1 == temp2)
@@ -99,27 +132,3 @@ def KalmanFilter(
     # pd.DataFrame(times).to_pickle("Dot")
     return yhat
 
-
-
-
-
-
-# Before Partial Nulls
-#     for t in range(0, n):
-#
-#         for i in range(0, p):
-#
-#             v[t,i] = y[t,i] - Z[i].dot(a[t,i,:])
-#
-#             # F[t,i] = np.linalg.multi_dot([Z[i], P[t, i,:,:], Z[i]]) + H[i, i]
-#             F[t, i] = Z[i].dot(P[t,i,:,:]).dot(Z[i]) + H[i, i]
-#
-#             K[t,i,:] = P[t,i,:,:].dot(Z[i]) * (F[t, i]**(-1))
-#             a[t,i+1,:] = a[t,i,:] + K[t,i,:] * v[t,i]
-#             P[t, i+1,:,:] = P[t, i,:,:] - np.outer(K[t,i,:] * F[t,i], K[t,i,:])
-#
-#
-#         a[t+1,0,:] =  T.dot(a[t, i+1, :])
-#
-#         # P[t+1, 0,:,:] = np.linalg.multi_dot([T, P[t, i + 1,:,:], TT]) + RQR
-#         P[t + 1, 0, :, :] = T.dot(P[t,i,:,:]).dot(TT) + RQR

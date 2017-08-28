@@ -3224,7 +3224,7 @@ static PyObject *__pyx_pf_4CKF3_KalmanFilter(CYTHON_UNUSED PyObject *__pyx_self,
  *             a[t,i+1,:] = a[t,i,:] + K[t,i,:] * v[t,i]
  * 
  *             P[t, i+1,:,:] = P[t, i,:,:] - np.outer(K[t,i,:] * F[t,i], K[t,i,:])             # <<<<<<<<<<<<<<
- *             # TODO try to overwrite Pt everytime since I don't use it
+ * 
  * 
  */
       __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_t); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 83, __pyx_L1_error)
@@ -3365,7 +3365,7 @@ static PyObject *__pyx_pf_4CKF3_KalmanFilter(CYTHON_UNUSED PyObject *__pyx_self,
     }
 
     /* "CKF3.pyx":86
- *             # TODO try to overwrite Pt everytime since I don't use it
+ * 
  * 
  *         a[t+1,0,:] =  T.dot(a[t, pt, :])             # <<<<<<<<<<<<<<
  * 
@@ -6080,7 +6080,7 @@ static int __Pyx_InitCachedConstants(void) {
  *             a[t,i+1,:] = a[t,i,:] + K[t,i,:] * v[t,i]
  * 
  *             P[t, i+1,:,:] = P[t, i,:,:] - np.outer(K[t,i,:] * F[t,i], K[t,i,:])             # <<<<<<<<<<<<<<
- *             # TODO try to overwrite Pt everytime since I don't use it
+ * 
  * 
  */
   __pyx_slice__18 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__18)) __PYX_ERR(0, 83, __pyx_L1_error)
@@ -6103,7 +6103,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_slice__23);
 
   /* "CKF3.pyx":86
- *             # TODO try to overwrite Pt everytime since I don't use it
+ * 
  * 
  *         a[t+1,0,:] =  T.dot(a[t, pt, :])             # <<<<<<<<<<<<<<
  * 
