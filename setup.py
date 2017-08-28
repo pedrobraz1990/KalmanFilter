@@ -9,17 +9,17 @@ setup(
     cmdclass = {'build_ext': build_ext},
     ext_modules = [
 
-        # Extension("CKF3",
-        #           sources=["CKF3.pyx"],
-        #           include_dirs=[np.get_include()],
-        #           # language="c++"
-        #           ),
-
-        Extension("TesteDgemm",
-                  sources=["TesteDgemm.pyx"],
+        Extension("CKF3",
+                  sources=["CKF3.pyx"],
                   include_dirs=[np.get_include()],
                   # language="c++"
                   ),
+
+        # Extension("TesteDgemm",
+        #           sources=["TesteDgemm.pyx"],
+        #           include_dirs=[np.get_include()],
+        #           # language="c++"
+        #           ),
 
     ],
 
