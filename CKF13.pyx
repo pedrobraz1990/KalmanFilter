@@ -12,8 +12,8 @@ ctypedef np.double_t DTYPE_t
 
 ##### KF
 # Univariate version of durbin and koopman
-# Should be the same as CKF10 but changing yindGlobal = ~np.isnan(y)
-#to the outer loop
+# Should be the same as CKF12 but using a C-inner product with memory views
+
 
 #bla
 
@@ -30,13 +30,25 @@ cdef int getSum(double [:,:] arr,int t, int p) :
              s += 1
     return s
 
-#def KalmanFilter(y, Z, Hsq, T, Q, a1, P1, R):
+
 @cython.boundscheck(False)
 @cython.wraparound(False)
+cdef double innerProduct(double [:] arr1, double [:] arr2 , int m,) :
+
+    cdef double res = 0
+    cdef int i
+
+    for i in range(0,m):
+        res += arr1[i] * arr2[i]
+    return res
+
+
 #@cython.initializedcheck(False)
-#@cython.cdivision(True)
 #@cython.nonecheck(False)
 #@profile
+@cython.cdivision(True)
+@cython.boundscheck(False)
+@cython.wraparound(False)
 def KalmanFilter(
         np.ndarray[DTYPE_t, ndim=2] y,
         np.ndarray[DTYPE_t, ndim=2] Z,
@@ -83,16 +95,12 @@ def KalmanFilter(
     cdef np.ndarray[DTYPE_t,ndim=2] Zt = np.empty((p, m))
     cdef np.ndarray[DTYPE_t,ndim=1] Ht = np.empty(p)
 
-#    cdef double[:,:] v_mv = v
-#    cdef double[:,:] F_mv = F
-#    cdef double[:,:,:] K_mv = K
-#    cdef double[:,:,:] a_mv = a
-#    cdef double[:,:,:,:] P_mv = P
 
-    # times = []
     cdef np.ndarray[DTYPE_t,ndim=1] H = np.diag(Hsq) #ONLY WORKS FOR DIAGONAL H
 
     cdef double[:,:] y_mv = y
+    cdef double[:,:,:] a_mv = a
+    cdef double[:,:] Zt_mv = Zt
 
     yindGlobal = ~np.isnan(y)
 
@@ -113,12 +121,13 @@ def KalmanFilter(
 
         for i in range(0, pt):
 
-            v = yt[i] - np.dot(Zt[i], a[t,i,:])
+#            v = yt[i] - np.dot(Zt[i], a[t,i,:])
+            v = yt[i] - innerProduct(Zt_mv[i],a_mv[t,i,:],m)
 
             # F[t,i] = np.linalg.multi_dot([Z[i], P[t, i,:,:], Z[i]]) + H[i, i]
             F = Zt[i].dot(P[:,:]).dot(Zt[i]) + Ht[i]
 
-            K[:] = P[:,:].dot(Zt[i]) * (F**(-1))
+            K[:] = P[:,:].dot(Zt[i]) * (1/F)
 
             a[t,i+1,:] = a[t,i,:] + K[:] * v
 

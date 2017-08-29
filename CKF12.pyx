@@ -12,8 +12,8 @@ ctypedef np.double_t DTYPE_t
 
 ##### KF
 # Univariate version of durbin and koopman
-# Should be the same as CKF10 but changing yindGlobal = ~np.isnan(y)
-#to the outer loop
+# Should be the same as CKF11 but using cdivision
+
 
 #bla
 
@@ -31,12 +31,13 @@ cdef int getSum(double [:,:] arr,int t, int p) :
     return s
 
 #def KalmanFilter(y, Z, Hsq, T, Q, a1, P1, R):
-@cython.boundscheck(False)
-@cython.wraparound(False)
+
 #@cython.initializedcheck(False)
-#@cython.cdivision(True)
 #@cython.nonecheck(False)
 #@profile
+@cython.cdivision(True)
+@cython.boundscheck(False)
+@cython.wraparound(False)
 def KalmanFilter(
         np.ndarray[DTYPE_t, ndim=2] y,
         np.ndarray[DTYPE_t, ndim=2] Z,
@@ -118,7 +119,7 @@ def KalmanFilter(
             # F[t,i] = np.linalg.multi_dot([Z[i], P[t, i,:,:], Z[i]]) + H[i, i]
             F = Zt[i].dot(P[:,:]).dot(Zt[i]) + Ht[i]
 
-            K[:] = P[:,:].dot(Zt[i]) * (F**(-1))
+            K[:] = P[:,:].dot(Zt[i]) * (1/F)
 
             a[t,i+1,:] = a[t,i,:] + K[:] * v
 
