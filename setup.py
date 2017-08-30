@@ -106,6 +106,62 @@ setup(
                   # language="c++"
                   ),
 
+        Extension("CKF16",
+                  sources=["CKF16.pyx"],
+                  include_dirs=[np.get_include()],
+                  define_macros=[('CYTHON_TRACE', '1')],
+                  # language="c++"
+                  ),
+
+        Extension("CKF17",
+                  sources=["CKF17.pyx"],
+                  include_dirs=[np.get_include()],
+                  define_macros=[('CYTHON_TRACE', '1')],
+                  # language="c++"
+                  ),
+
+        Extension("CKF18",
+                  sources=["CKF18.pyx"],
+                  include_dirs=[np.get_include()],
+                  define_macros=[('CYTHON_TRACE', '1')],
+                  # language="c++"
+                  ),
+
+        Extension("CKF19",
+                  sources=["CKF19.pyx"],
+                  include_dirs=[np.get_include()],
+                  define_macros=[('CYTHON_TRACE', '1')],
+                  # language="c++"
+                  ),
+
+        Extension("CKF20",
+                  sources=["CKF20.pyx"],
+                  include_dirs=[np.get_include()],
+                  define_macros=[('CYTHON_TRACE', '1')],
+                  # language="c++"
+                  ),
+
+        Extension("CKF21",
+                  sources=["CKF21.pyx"],
+                  include_dirs=[np.get_include()],
+                  define_macros=[('CYTHON_TRACE', '1')],
+                  # language="c++"
+                  ),
+
+        Extension("CKF22",
+                  sources=["CKF22.pyx"],
+                  include_dirs=[np.get_include()],
+                  define_macros=[('CYTHON_TRACE', '1')],
+                  # language="c++"
+                  ),
+
+        Extension("CKF23",
+                  sources=["CKF23.pyx"],
+                  include_dirs=[np.get_include()],
+                  define_macros=[('CYTHON_TRACE', '1')],
+                  # language="c++"
+                  ),
+
         # Extension("CKF5",
         #           sources=["CKF5.pyx"],
         #           include_dirs=[np.get_include()],
