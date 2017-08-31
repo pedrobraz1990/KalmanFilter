@@ -17,6 +17,7 @@ import CKF18
 import CKF20
 import CKF21
 import CKF23
+import CKF24
 
 # PARAMETERS
 m = 2
@@ -80,7 +81,7 @@ P1 = np.diag(np.ones(m) * 1.0)
 
 # ret = CKF3.KalmanFilter(y = y, Z = Z,H = H,T = T,R = R,Q = Q,a1 = a1,P1 = P1)
 # ret = CKF3.KalmanFilter(y,Z,H,T,Q,a1,P1, R)
-ret = CKF23.KalmanFilter(nny,Z,H,T,Q,a1,P1, R)
+ret = CKF24.KalmanFilter(nny,Z,H,T,Q,a1,P1, R)
 
 # ret = KF3.KalmanFilter(
 #     # y = y,

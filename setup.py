@@ -162,6 +162,20 @@ setup(
                   # language="c++"
                   ),
 
+        Extension("CKF24",
+                  sources=["CKF24.pyx"],
+                  include_dirs=[np.get_include()],
+                  define_macros=[('CYTHON_TRACE', '1')],
+                  # language="c++"
+                  ),
+
+        Extension("CKF25",
+                  sources=["CKF25.pyx"],
+                  include_dirs=[np.get_include()],
+                  define_macros=[('CYTHON_TRACE', '1')],
+                  # language="c++"
+                  ),
+
         # Extension("CKF5",
         #           sources=["CKF5.pyx"],
         #           include_dirs=[np.get_include()],
